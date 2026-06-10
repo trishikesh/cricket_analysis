@@ -1,0 +1,24 @@
+{
+    "snyk.advanced.autoSelectOrganization": true,
+    "sqltools.connections": [
+        {
+            "authenticator": "SNOWFLAKE",
+            "ocspOptions": {
+                "ocspFailOpen": true
+            },
+            "snowflakeOptions": {
+                "clientSessionKeepAlive": true,
+                "clientSessionKeepAliveHeartbeatFrequency": 3600
+            },
+            "previewLimit": 50,
+            "driver": "Snowflake",
+            "name": "cricket_analysis",
+            "account": "NMYDGUO-ZK56226",
+            "username": "TRISHIMANI24",
+            "password": "Rishi24Mani43$$",
+            "database": "CRICKET_ANALYTICS",
+            "warehouse": "CRICKET_WH"
+        }
+    ],
+    "git.ignoreLimitWarning": true
+}

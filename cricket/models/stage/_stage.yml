@@ -1,0 +1,34 @@
+# models/stage/_stage.yml
+
+version: 2
+
+sources:
+  - name: staging
+    database: cricket_analytics
+    schema: staging
+    tables:
+      - name: ODI_BATTING_CARD
+      - name: ODI_BOWLING_CARD
+      - name: ODI_FOW_CARD
+      - name: ODI_MATCHES_DATA
+      - name: ODI_PARTNERSHIP_CARD
+      - name: PLAYERS_INFO
+
+models:
+  - name: stg_odi_batting_card
+    description: cleaned ODI batting card
+
+  - name: stg_odi_bowling_card
+    description: cleaned ODI bowling card
+
+  - name: stg_odi_fow_card
+    description: cleaned ODI fall of wickets card
+
+  - name: stg_odi_matches_data
+    description: cleaned ODI matches data
+
+  - name: stg_odi_partnership_card
+    description: cleaned ODI partnership card
+
+  - name: stg_players_info
+    description: cleaned players info
