@@ -5,18 +5,18 @@
 
 with venue_base as (
 
-    select distinct
+    select
         venue_key,
-        venue_full_name,
-        venue_stadium,
-        venue_city,
-        venue_country
-
+        max(venue_full_name) as venue_full_name,
+        max(venue_stadium) as venue_stadium,
+        max(venue_city) as venue_city,
+        max(venue_country) as venue_country,
+        count(distinct match_id) as total_matches_hosted
     from {{ ref('int_match_summary') }}
-
-    where venue_key is not null
+    group by venue_key
 
 ),
+
 
 venue_stats as (
 

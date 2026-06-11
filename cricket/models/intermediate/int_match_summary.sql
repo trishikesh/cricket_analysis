@@ -86,9 +86,11 @@ final as (
         ) as venue_full_name,
 
         concat(
-            coalesce(venue_city, ''),
+            coalesce(venue_stadium, 'Unknown Stadium'),
             '_',
-            coalesce(venue_country, '')
+            coalesce(venue_city, 'Unknown City'),
+            '_',
+            coalesce(venue_country, 'Unknown Country')
         ) as venue_key,
 
         case

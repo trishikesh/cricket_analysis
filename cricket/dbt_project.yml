@@ -33,6 +33,7 @@ models:
   cricket:
     # Config indicated by + and applies to all files under models/example/
     stage:
+      
       +materialized: view
     intermediate:
       +schema: intermediate
