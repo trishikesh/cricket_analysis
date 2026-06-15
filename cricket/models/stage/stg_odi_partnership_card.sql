@@ -1,5 +1,3 @@
--- models/stage/stg_odi_partnership_card.sql
-
 {{ config(materialized='view') }}
 
 select

@@ -1,5 +1,3 @@
--- models/stage/stg_odi_fow_card.sql
-
 {{ config(materialized='view') }}
 
 select
@@ -9,5 +7,5 @@ select
     nullif(trim(player::string), '')            as player,
     wicket::int                                as wicket_number,
     over::float                                as over_number,
-    runs::int                                  as team_runs
+    runs::int                                  as player_runs
 from {{ source('staging', 'ODI_FOW_CARD') }}

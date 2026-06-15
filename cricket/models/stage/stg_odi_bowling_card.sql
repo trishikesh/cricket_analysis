@@ -1,5 +1,3 @@
--- models/stage/stg_odi_bowling_card.sql
-
 {{ config(materialized='view') }}
 
 select

@@ -7,12 +7,12 @@ with matches as (
 
     select
         match_id,
-        odi_match_no,
+       -- odi_match_no,
         match_name,
         series_id,
         series_name,
         match_date,
-        match_format,
+        --match_format,
 
         team1_id,
         team1_name,
@@ -21,11 +21,11 @@ with matches as (
 
         team1_runs_scored,
         team1_wickets_fell,
-        team1_extras_received,
+        
 
         team2_runs_scored,
         team2_wickets_fell,
-        team2_extras_received,
+        
 
         venue_stadium,
         venue_city,
@@ -40,50 +40,58 @@ with matches as (
     from {{ ref('stg_odi_matches_data') }}
 
 ),
+players_info as (
+
+    select
+        player_id,
+        player_name
+    from {{ ref('stg_players_info') }}
+
+),
 
 final as (
 
     select
-        match_id,
-        odi_match_no,
-        match_name,
-        series_id,
-        series_name,
-        match_date,
-        match_format,
+        m.match_id,
+        -- odi_match_no,
+        m.match_name,
+        m.series_id,
+        m.series_name,
+        m.match_date,
+      --  match_format,
 
-        team1_id,
-        team1_name,
-        team2_id,
-        team2_name,
+        m.team1_id,
+        m.team1_name,
+        m.team2_id,
+        m.team2_name,
 
-        team1_runs_scored,
-        team1_wickets_fell,
-        team1_extras_received,
+        m.team1_runs_scored,
+        m.team1_wickets_fell,
+      --  team1_extras_received,
 
-        team2_runs_scored,
-        team2_wickets_fell,
-        team2_extras_received,
+        m.team2_runs_scored,
+        m.team2_wickets_fell,
+       -- team2_extras_received,
 
-        venue_stadium,
-        venue_city,
-        venue_country,
+        m.venue_stadium,
+        m.venue_city,
+        m.venue_country,
 
-        toss_winner,
-        toss_winner_choice,
-        match_winner,
-        match_result_text,
-        player_of_match,
+        m.toss_winner,
+        m.toss_winner_choice,
+        m.match_winner,
+        m.match_result_text,
+        p.player_name as player_of_match,
 
-        concat(team1_name, ' vs ', team2_name) as match_display_name,
+        -- concat(team1_name, ' vs ', team2_name) as match_display_name,
 
-        concat(
+      /*   concat(
             coalesce(venue_stadium, ''),
             ', ',
             coalesce(venue_city, ''),
             ', ',
             coalesce(venue_country, '')
-        ) as venue_full_name,
+        ) as venue_full_name, 
 
         concat(
             coalesce(venue_stadium, 'Unknown Stadium'),
@@ -91,7 +99,7 @@ final as (
             coalesce(venue_city, 'Unknown City'),
             '_',
             coalesce(venue_country, 'Unknown Country')
-        ) as venue_key,
+        ) as venue_key, */
 
         case
             when match_winner = team1_name then team1_name
@@ -102,7 +110,7 @@ final as (
         case
             when match_winner = team1_name then team2_name
             when match_winner = team2_name then team1_name
-            else null
+            else 'Tie'
         end as losing_team,
 
         case
@@ -119,7 +127,7 @@ final as (
         case
             when team1_runs_scored > team2_runs_scored then team1_name
             when team2_runs_scored > team1_runs_scored then team2_name
-            else null
+            else 'Same Runs'
         end as higher_scoring_team,
 
         abs(coalesce(team1_runs_scored, 0) - coalesce(team2_runs_scored, 0)) as run_difference,
@@ -132,7 +140,7 @@ final as (
             else 'Other'
         end as result_type,
 
-        case
+        /* case
             when team1_wickets_fell = 10 then 1
             else 0
         end as team1_all_out_flag,
@@ -140,9 +148,11 @@ final as (
         case
             when team2_wickets_fell = 10 then 1
             else 0
-        end as team2_all_out_flag
+        end as team2_all_out_flag */
 
-    from matches
+        from matches m
+        left join players_info p
+            on m.player_of_match = p.player_id
 
 )
 

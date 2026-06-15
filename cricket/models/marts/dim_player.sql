@@ -5,27 +5,27 @@
 
 with batting_players as (
 
-    select distinct
-        batsman as player_name,
+    select distinct --select only unique values 
+        batsman_name as player_name,
         team as team_name,
         'Batter' as player_source_role
 
     from {{ ref('int_batting_performance') }}
 
-    where batsman is not null
+    where batsman_name is not null
 
 ),
 
 bowling_players as (
 
     select distinct
-        bowler_id as player_name,
+        bowler_name as player_name,
         team as team_name,
         'Bowler' as player_source_role
 
     from {{ ref('int_bowling_performance') }}
 
-    where bowler_id is not null
+    where bowler_name is not null
 
 ),
 
@@ -61,7 +61,7 @@ player_base as (
 batting_stats as (
 
     select
-        batsman as player_name,
+        batsman_name as player_name,
         team as team_name,
 
         count(distinct match_id) as batting_matches,
@@ -79,7 +79,7 @@ batting_stats as (
     from {{ ref('int_batting_performance') }}
 
     group by
-        batsman,
+        batsman_name,
         team
 
 ),
@@ -87,7 +87,7 @@ batting_stats as (
 bowling_stats as (
 
     select
-        bowler_id as player_name,
+        bowler_name as player_name,
         team as team_name,
 
         count(distinct match_id) as bowling_matches,
@@ -102,7 +102,7 @@ bowling_stats as (
     from {{ ref('int_bowling_performance') }}
 
     group by
-        bowler_id,
+        bowler_name,
         team
 
 ),
@@ -110,8 +110,6 @@ bowling_stats as (
 final as (
 
     select
-        md5(coalesce(pb.player_name, '') || '_' || coalesce(pb.team_name, '')) as player_key,
-
         pb.player_name,
         pb.team_name,
 
@@ -122,9 +120,7 @@ final as (
             else 'Unknown'
         end as player_role_group,
 
-        pb.has_batting_record,
-        pb.has_bowling_record,
-
+      
         coalesce(bs.batting_matches, 0) as batting_matches,
         coalesce(bs.total_runs, 0) as total_runs,
         coalesce(bs.total_balls_faced, 0) as total_balls_faced,

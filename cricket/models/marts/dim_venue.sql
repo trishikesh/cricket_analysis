@@ -6,23 +6,11 @@
 with venue_base as (
 
     select
-        venue_key,
-        max(venue_full_name) as venue_full_name,
-        max(venue_stadium) as venue_stadium,
+       /* venue_key,
+        max(venue_full_name) as venue_full_name,*/
+        max(venue_stadium) as venue_stadium, 
         max(venue_city) as venue_city,
         max(venue_country) as venue_country,
-        count(distinct match_id) as total_matches_hosted
-    from {{ ref('int_match_summary') }}
-    group by venue_key
-
-),
-
-
-venue_stats as (
-
-    select
-        venue_key,
-
         count(distinct match_id) as total_matches_hosted,
 
         avg(
@@ -44,49 +32,43 @@ venue_stats as (
 
     from {{ ref('int_match_summary') }}
 
-    group by venue_key
+    group by venue_stadium, venue_city, venue_country
 
 ),
 
 final as (
 
     select
-        md5(coalesce(v.venue_key, '')) as venue_key_hash,
+        
+        venue_stadium,
+        venue_city,
+        venue_country,
 
-        v.venue_key,
-        v.venue_full_name,
-        v.venue_stadium,
-        v.venue_city,
-        v.venue_country,
+        coalesce(total_matches_hosted, 0) as total_matches_hosted,
+        round(avg_total_match_runs, 2) as avg_total_match_runs,
+        round(avg_team1_score, 2) as avg_team1_score,
+        round(avg_team2_score, 2) as avg_team2_score,
+        highest_innings_score,
 
-        coalesce(s.total_matches_hosted, 0) as total_matches_hosted,
-        round(s.avg_total_match_runs, 2) as avg_total_match_runs,
-        round(s.avg_team1_score, 2) as avg_team1_score,
-        round(s.avg_team2_score, 2) as avg_team2_score,
-        s.highest_innings_score,
-
-        coalesce(s.matches_won_by_runs, 0) as matches_won_by_runs,
-        coalesce(s.matches_won_by_wickets, 0) as matches_won_by_wickets,
+        coalesce(matches_won_by_runs, 0) as matches_won_by_runs,
+        coalesce(matches_won_by_wickets, 0) as matches_won_by_wickets,
 
         round(
-            coalesce(s.matches_won_by_runs, 0) / nullif(s.total_matches_hosted, 0) * 100,
+            coalesce(matches_won_by_runs, 0) / nullif(total_matches_hosted, 0) * 100,
             2
         ) as bat_first_win_percentage,
 
         round(
-            coalesce(s.matches_won_by_wickets, 0) / nullif(s.total_matches_hosted, 0) * 100,
+            coalesce(matches_won_by_wickets, 0) / nullif(total_matches_hosted, 0) * 100,
             2
         ) as chasing_win_percentage,
 
         round(
-            coalesce(s.toss_winner_match_wins, 0) / nullif(s.total_matches_hosted, 0) * 100,
+            coalesce(toss_winner_match_wins, 0) / nullif(total_matches_hosted, 0) * 100,
             2
         ) as toss_winner_win_percentage
 
-    from venue_base v
-
-    left join venue_stats s
-        on v.venue_key = s.venue_key
+    from venue_base 
 
 )
 

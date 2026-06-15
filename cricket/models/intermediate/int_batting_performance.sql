@@ -1,8 +1,12 @@
+
+-- make actual table --> stores logic made cols - instead of recalculating it eveyrtime someone queires --> store in intermediate schema
 {{ config(
-    materialized = 'table',
+    materialized = 'table',                      
     schema = 'intermediate'
 ) }}
 
+
+-- cte -> common table expresiion --> easier to read, organized and easy to debug
 with batting as (
 
     select
@@ -20,9 +24,9 @@ with batting as (
         bowler,
         fielders
 
-    from {{ ref('stg_odi_batting_card') }}
+    from {{ ref('stg_odi_batting_card') }}  --gud as track dependancy and correect build order
 
-),
+),   -- ',' = another cte
 
 matches as (
 
@@ -31,7 +35,7 @@ matches as (
         series_id,
         series_name,
         match_date,
-        venue_key,
+        --venue_key,
         venue_city,
         venue_country,
         match_winner
@@ -39,19 +43,28 @@ matches as (
     from {{ ref('int_match_summary') }}
 
 ),
+players_info as (
 
-final as (
+    select
+        player_id,
+        player_name
+    from {{ ref('stg_players_info') }}
+
+),
+
+
+final as (              --main
 
     select
         b.match_id,
         b.innings,
         b.team,
-        b.batsman,
+        p.player_name as batsman_name,
 
         m.series_id,
         m.series_name,
         m.match_date,
-        m.venue_key,
+        --m.venue_key,
         m.venue_city,
         m.venue_country,
         m.match_winner,
@@ -66,9 +79,9 @@ final as (
         b.bowler,
         b.fielders,
 
-        concat(b.match_id, '_', b.batsman) as batsman_match_key,
+      --  concat(b.match_id, '_', b.batsman) as batsman_match_key,
 
-        concat(b.team, '_', b.batsman) as team_batsman_key,
+       -- concat(b.team, '_', b.batsman) as team_batsman_key,
 
         coalesce(b.fours, 0) * 4 as runs_from_fours,
 
@@ -128,9 +141,9 @@ final as (
             else 'No Score'
         end as strike_rate_bucket,
 
-        case
-            when b.is_out = 0 then 'Not Out'
-            when b.wicket_type ilike '%caught%' then 'Caught'
+        case   -- condition check
+            when not b.is_out then 'Not Out'
+            when b.wicket_type ilike '%caught%' then 'Caught'     -- ilike = case insensitive pattern matching
             when b.wicket_type ilike '%bowled%' then 'Bowled'
             when b.wicket_type ilike '%lbw%' then 'LBW'
             when b.wicket_type ilike '%run out%' then 'Run Out'
@@ -145,9 +158,12 @@ final as (
         end as batsman_team_won_flag
 
     from batting b
-
+--left join since we want all the batting rows - even if match data is not there
     left join matches m
         on b.match_id = m.match_id
+
+    left join players_info p
+        on b.batsman = p.player_id
 
 )
 

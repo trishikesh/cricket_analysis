@@ -9,7 +9,7 @@ select
     nullif(trim(series_id::string), '')         as series_id,
     nullif(trim(series_name::string), '')       as series_name,
     try_to_date(match_date::string)             as match_date,
-    upper(nullif(trim(match_format::string), '')) as match_format,
+   -- upper(nullif(trim(match_format::string), '')) as match_format,          REMOVING SINCE ONLY 1 VALUE FOR ALL
 
     nullif(trim(team1_id::string), '')          as team1_id,
     nullif(trim(team1_name::string), '')        as team1_name,
@@ -40,7 +40,7 @@ select
     nullif(trim(match_result_text::string), '') as match_result_text,
     nullif(trim(mom_player::string), '')        as player_of_match,
 
-    nullif(trim(team1_playing_11::string), '')  as team1_playing_11,
-    nullif(trim(team2_playing_11::string), '')  as team2_playing_11,
+    -- nullif(trim(team1_playing_11::string), '')  as team1_playing_11,
+    -- nullif(trim(team2_playing_11::string), '')  as team2_playing_11,
     nullif(trim(debut_players::string), '')     as debut_players
 from {{ source('staging', 'ODI_MATCHES_DATA') }}

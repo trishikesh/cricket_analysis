@@ -34,12 +34,19 @@ matches as (
         series_id,
         series_name,
         match_date,
-        venue_key,
         venue_city,
         venue_country,
         match_winner
 
     from {{ ref('int_match_summary') }}
+
+),
+players_info as (
+
+    select
+        player_id,
+        player_name
+    from {{ ref('stg_players_info') }}
 
 ),
 
@@ -50,12 +57,11 @@ final as (
         bw.innings,
         bw.team,
         bw.opposition,
-        bw.bowler_id,
+        p.player_id as bowler_name,
 
         m.series_id,
         m.series_name,
         m.match_date,
-        m.venue_key,
         m.venue_city,
         m.venue_country,
         m.match_winner,
@@ -140,6 +146,8 @@ final as (
 
     left join matches m
         on bw.match_id = m.match_id
+    left join players_info p
+        on bw.bowler_id = p.player_id
 
 )
 

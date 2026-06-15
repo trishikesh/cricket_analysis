@@ -7,7 +7,7 @@ with matches as (
 
     select
         match_id,
-        odi_match_no,
+       -- odi_match_no,
         match_name,
         series_id,
         series_name,
@@ -17,15 +17,15 @@ with matches as (
         team1_name,
         team1_runs_scored,
         team1_wickets_fell,
-        team1_extras_received,
+        
 
         team2_id,
         team2_name,
         team2_runs_scored,
         team2_wickets_fell,
-        team2_extras_received,
+        
 
-        venue_key,
+      --  venue_key,
         venue_stadium,
         venue_city,
         venue_country,
@@ -45,13 +45,13 @@ team1_rows as (
 
     select
         match_id,
-        odi_match_no,
+      --  odi_match_no,
         match_name,
         series_id,
         series_name,
         match_date,
 
-        1 as team_position,
+        --1 as team_position,
         team1_id as team_id,
         team1_name as team_name,
         team2_id as opposition_id,
@@ -59,13 +59,12 @@ team1_rows as (
 
         team1_runs_scored as runs_scored,
         team1_wickets_fell as wickets_lost,
-        team1_extras_received as extras_received,
+       
 
         team2_runs_scored as runs_conceded,
         team2_wickets_fell as wickets_taken,
-        team2_extras_received as extras_conceded,
 
-        venue_key,
+       -- venue_key,
         venue_stadium,
         venue_city,
         venue_country,
@@ -85,13 +84,13 @@ team2_rows as (
 
     select
         match_id,
-        odi_match_no,
+      --  odi_match_no,
         match_name,
         series_id,
         series_name,
         match_date,
 
-        2 as team_position,
+        --2 as team_position,
         team2_id as team_id,
         team2_name as team_name,
         team1_id as opposition_id,
@@ -99,13 +98,11 @@ team2_rows as (
 
         team2_runs_scored as runs_scored,
         team2_wickets_fell as wickets_lost,
-        team2_extras_received as extras_received,
 
         team1_runs_scored as runs_conceded,
         team1_wickets_fell as wickets_taken,
-        team1_extras_received as extras_conceded,
 
-        venue_key,
+       -- venue_key,
         venue_stadium,
         venue_city,
         venue_country,
@@ -137,13 +134,13 @@ final as (
 
     select
         match_id,
-        odi_match_no,
+      --  odi_match_no,
         match_name,
         series_id,
         series_name,
         match_date,
 
-        team_position,
+        --team_position,
         team_id,
         team_name,
         opposition_id,
@@ -151,13 +148,11 @@ final as (
 
         runs_scored,
         wickets_lost,
-        extras_received,
 
         runs_conceded,
         wickets_taken,
-        extras_conceded,
 
-        venue_key,
+       -- venue_key,
         venue_stadium,
         venue_city,
         venue_country,
@@ -169,7 +164,7 @@ final as (
         result_type,
         run_difference,
 
-        concat(match_id, '_', team_name) as team_match_key,
+      
 
         case
             when team_name = match_winner then 1
@@ -220,7 +215,7 @@ final as (
             else 'Equal Score'
         end as scoring_result,
 
-        runs_scored - runs_conceded as team_run_margin
+        
 
     from unioned
 
