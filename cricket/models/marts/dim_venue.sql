@@ -6,11 +6,10 @@
 with venue_base as (
 
     select
-       /* venue_key,
-        max(venue_full_name) as venue_full_name,*/
-        max(venue_stadium) as venue_stadium, 
-        max(venue_city) as venue_city,
-        max(venue_country) as venue_country,
+        venue_stadium,
+        venue_city,
+        venue_country,
+
         count(distinct match_id) as total_matches_hosted,
 
         avg(
@@ -32,14 +31,28 @@ with venue_base as (
 
     from {{ ref('int_match_summary') }}
 
-    group by venue_stadium, venue_city, venue_country
+    where venue_city is not null
+       or venue_country is not null
+       or venue_stadium is not null
+
+    group by
+        venue_stadium,
+        venue_city,
+        venue_country
 
 ),
 
 final as (
 
     select
-        
+        md5(
+            coalesce(upper(trim(venue_stadium)), '')
+            || '|'
+            || coalesce(upper(trim(venue_city)), '')
+            || '|'
+            || coalesce(upper(trim(venue_country)), '')
+        ) as venue_key,
+
         venue_stadium,
         venue_city,
         venue_country,
@@ -68,7 +81,7 @@ final as (
             2
         ) as toss_winner_win_percentage
 
-    from venue_base 
+    from venue_base
 
 )
 

@@ -7,17 +7,11 @@ import snowflake.connector
 from snowflake.connector.pandas_tools import write_pandas
 from dotenv import load_dotenv
 
-# =========================
-# PATHS / ENV
-# =========================
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 DATA_DIR = BASE_DIR / "ds"
 
-# =========================
-# CONFIG
-# =========================
 SNOWFLAKE_CONFIG = {
     "user": os.getenv("SNOWFLAKE_USER"),
     "password": os.getenv("SNOWFLAKE_PASSWORD"),
@@ -29,9 +23,7 @@ SNOWFLAKE_CONFIG = {
 }
 
 
-# =========================
-# HELPERS
-# =========================
+
 def validate_config():
     required = ["user", "password", "account", "warehouse", "database", "schema"]
     missing = [k for k in required if not SNOWFLAKE_CONFIG.get(k)]
@@ -71,7 +63,6 @@ def preprocess_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     df = df.dropna(how="all").copy()
     df = df.where(pd.notnull(df), None)
 
-    # write_pandas works more reliably with a clean RangeIndex
     df = df.reset_index(drop=True)
 
     return df
@@ -107,9 +98,6 @@ def read_csv_safely(file_path: Path) -> pd.DataFrame:
     raise ValueError(f"Unable to read file: {file_path.name}")
 
 
-# =========================
-# MAIN
-# =========================
 def main():
     validate_config()
 

@@ -22,7 +22,6 @@ with bowling as (
         sixes,
         wides,
         no_balls
-
     from {{ ref('stg_odi_bowling_card') }}
 
 ),
@@ -34,19 +33,21 @@ matches as (
         series_id,
         series_name,
         match_date,
+        venue_stadium,
         venue_city,
         venue_country,
         match_winner
-
     from {{ ref('int_match_summary') }}
 
 ),
 players_info as (
 
     select
+        player_key,
         player_id,
+        player_object_id,
         player_name
-    from {{ ref('stg_players_info') }}
+    from {{ ref('int_player_lookup') }}
 
 ),
 
@@ -57,11 +58,14 @@ final as (
         bw.innings,
         bw.team,
         bw.opposition,
-        p.player_id as bowler_name,
+        bw.bowler_id,
+        coalesce(p.player_name, bw.bowler_id) as bowler_name,
+
 
         m.series_id,
         m.series_name,
         m.match_date,
+        m.venue_stadium,
         m.venue_city,
         m.venue_country,
         m.match_winner,
@@ -79,15 +83,11 @@ final as (
         bw.no_balls,
 
         concat(bw.match_id, '_', bw.bowler_id) as bowler_match_key,
-
         concat(bw.team, '_', bw.bowler_id) as team_bowler_key,
 
         coalesce(bw.wides, 0) + coalesce(bw.no_balls, 0) as extras_conceded,
-
         coalesce(bw.fours, 0) + coalesce(bw.sixes, 0) as boundaries_conceded,
-
-        coalesce(bw.fours, 0) * 4
-            + coalesce(bw.sixes, 0) * 6 as boundary_runs_conceded,
+        coalesce(bw.fours, 0) * 4 + coalesce(bw.sixes, 0) * 6 as boundary_runs_conceded,
 
         case
             when bw.balls > 0 then round(coalesce(bw.dots, 0) / bw.balls * 100, 2)
@@ -96,23 +96,14 @@ final as (
 
         case
             when bw.balls > 0 then round(
-                (
-                    coalesce(bw.fours, 0) + coalesce(bw.sixes, 0)
-                ) / bw.balls * 100,
+                (coalesce(bw.fours, 0) + coalesce(bw.sixes, 0)) / bw.balls * 100,
                 2
             )
             else 0
         end as boundary_ball_percentage_conceded,
 
-        case
-            when bw.wickets >= 5 then 1
-            else 0
-        end as five_wicket_haul_flag,
-
-        case
-            when bw.wickets >= 4 then 1
-            else 0
-        end as four_plus_wicket_flag,
+        case when bw.wickets >= 5 then 1 else 0 end as five_wicket_haul_flag,
+        case when bw.wickets >= 4 then 1 else 0 end as four_plus_wicket_flag,
 
         case
             when bw.wickets >= 5 then '5+ wickets'
@@ -143,12 +134,10 @@ final as (
         end as bowler_team_won_flag
 
     from bowling bw
-
     left join matches m
         on bw.match_id = m.match_id
     left join players_info p
-        on bw.bowler_id = p.player_id
-
+        on bw.bowler_id = p.player_key
 )
 
 select *

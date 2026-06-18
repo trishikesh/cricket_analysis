@@ -53,12 +53,11 @@ final as (
 
     select
         m.match_id,
-        -- odi_match_no,
         m.match_name,
         m.series_id,
         m.series_name,
         m.match_date,
-      --  match_format,
+  
 
         m.team1_id,
         m.team1_name,
@@ -67,11 +66,11 @@ final as (
 
         m.team1_runs_scored,
         m.team1_wickets_fell,
-      --  team1_extras_received,
+     
 
         m.team2_runs_scored,
         m.team2_wickets_fell,
-       -- team2_extras_received,
+       
 
         m.venue_stadium,
         m.venue_city,
@@ -82,24 +81,6 @@ final as (
         m.match_winner,
         m.match_result_text,
         p.player_name as player_of_match,
-
-        -- concat(team1_name, ' vs ', team2_name) as match_display_name,
-
-      /*   concat(
-            coalesce(venue_stadium, ''),
-            ', ',
-            coalesce(venue_city, ''),
-            ', ',
-            coalesce(venue_country, '')
-        ) as venue_full_name, 
-
-        concat(
-            coalesce(venue_stadium, 'Unknown Stadium'),
-            '_',
-            coalesce(venue_city, 'Unknown City'),
-            '_',
-            coalesce(venue_country, 'Unknown Country')
-        ) as venue_key, */
 
         case
             when match_winner = team1_name then team1_name
@@ -117,6 +98,11 @@ final as (
             when toss_winner = match_winner then 1
             else 0
         end as toss_winner_won_match_flag,
+
+        case
+            when match_winner != toss_winner then 1
+            else 0
+        end as toss_lost_won_match_flag,
 
         case
             when lower(toss_winner_choice) in ('bat', 'bat first', 'batting') then 'Bat First'
@@ -140,15 +126,6 @@ final as (
             else 'Other'
         end as result_type,
 
-        /* case
-            when team1_wickets_fell = 10 then 1
-            else 0
-        end as team1_all_out_flag,
-
-        case
-            when team2_wickets_fell = 10 then 1
-            else 0
-        end as team2_all_out_flag */
 
         from matches m
         left join players_info p

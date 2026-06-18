@@ -6,13 +6,9 @@
 with teams as (
 
     select distinct
-        team_id,
         team_name
-
     from {{ ref('int_team_innings_performance') }}
-
-    where team_id is not null
-       or team_name is not null
+    where team_name is not null
 
 ),
 
@@ -29,14 +25,13 @@ team_stats as (
 
         avg(runs_scored) as avg_runs_scored,
         avg(wickets_lost) as avg_wickets_lost,
-        --avg(runs_conceded) as avg_runs_conceded,
         avg(wickets_taken) as avg_wickets_taken,
 
         max(runs_scored) as highest_team_score,
         min(nullif(runs_scored, 0)) as lowest_team_score
 
     from {{ ref('int_team_innings_performance') }}
-
+    where team_name is not null
     group by team_name
 
 ),
@@ -44,9 +39,8 @@ team_stats as (
 final as (
 
     select
-        
+        md5(upper(trim(t.team_name))) as team_key,
 
-        t.team_id,
         t.team_name,
 
         coalesce(s.total_matches_played, 0) as total_matches_played,
@@ -67,7 +61,6 @@ final as (
 
         round(s.avg_runs_scored, 2) as avg_runs_scored,
         round(s.avg_wickets_lost, 2) as avg_wickets_lost,
-       -- round(s.avg_runs_conceded, 2) as avg_runs_conceded,
         round(s.avg_wickets_taken, 2) as avg_wickets_taken,
 
         s.highest_team_score,

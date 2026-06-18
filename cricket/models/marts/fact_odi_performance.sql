@@ -11,6 +11,9 @@ with team_performance as (
         'TEAM' as performance_type,
 
         team_name,
+        md5(upper(trim(team_name))) as team_key,
+
+        cast(null as varchar) as player_id,
         cast(null as varchar) as player_name,
 
         opposition_name,
@@ -18,11 +21,9 @@ with team_performance as (
 
         runs_scored,
         wickets_lost,
-        --cast(null as number) as extras_received,
 
         runs_conceded,
         wickets_taken,
-        --cast(null as number) as extras_conceded,
 
         cast(null as number) as balls_faced,
         cast(null as number) as fours,
@@ -45,16 +46,25 @@ with team_performance as (
 
         cast(null as number) as hundred_flag,
         cast(null as number) as fifty_flag,
-        --cast(null as number) as duck_flag,
 
-        score_bucket as performance_bucket,
-        batting_stability_bucket as secondary_bucket,
+        
 
         match_date,
         series_id,
         series_name,
+
+        venue_stadium,
         venue_city,
         venue_country,
+
+        md5(
+            coalesce(upper(trim(venue_stadium)), '')
+            || '|'
+            || coalesce(upper(trim(venue_city)), '')
+            || '|'
+            || coalesce(upper(trim(venue_country)), '')
+        ) as venue_key,
+
         match_winner
 
     from {{ ref('int_team_innings_performance') }}
@@ -69,6 +79,9 @@ batting_performance as (
         'BATTING' as performance_type,
 
         team as team_name,
+        md5(upper(trim(team))) as team_key,
+
+        cast(batsman_id as varchar) as player_id,
         batsman_name as player_name,
 
         cast(null as varchar) as opposition_name,
@@ -76,11 +89,9 @@ batting_performance as (
 
         runs as runs_scored,
         cast(null as number) as wickets_lost,
-        --cast(null as number) as extras_received,
 
         cast(null as number) as runs_conceded,
         cast(null as number) as wickets_taken,
-        --cast(null as number) as extras_conceded,
 
         balls as balls_faced,
         fours,
@@ -103,16 +114,24 @@ batting_performance as (
 
         hundred_flag,
         fifty_flag,
-        --duck_flag,
 
-        runs_bucket as performance_bucket,
-        strike_rate_bucket as secondary_bucket,
 
         match_date,
         series_id,
         series_name,
+
+        venue_stadium,
         venue_city,
         venue_country,
+
+        md5(
+            coalesce(upper(trim(venue_stadium)), '')
+            || '|'
+            || coalesce(upper(trim(venue_city)), '')
+            || '|'
+            || coalesce(upper(trim(venue_country)), '')
+        ) as venue_key,
+
         match_winner
 
     from {{ ref('int_batting_performance') }}
@@ -127,6 +146,9 @@ bowling_performance as (
         'BOWLING' as performance_type,
 
         team as team_name,
+        md5(upper(trim(team))) as team_key,
+
+        cast(bowler_id as varchar) as player_id,
         bowler_name as player_name,
 
         opposition as opposition_name,
@@ -134,11 +156,9 @@ bowling_performance as (
 
         cast(null as number) as runs_scored,
         cast(null as number) as wickets_lost,
-        --cast(null as number) as extras_received,
 
         runs_conceded,
         wickets as wickets_taken,
-        --extras_conceded,
 
         cast(null as number) as balls_faced,
         fours,
@@ -161,16 +181,25 @@ bowling_performance as (
 
         cast(null as number) as hundred_flag,
         cast(null as number) as fifty_flag,
-        --cast(null as number) as duck_flag,
 
-        wicket_bucket as performance_bucket,
-        economy_bucket as secondary_bucket,
+        
 
         match_date,
         series_id,
         series_name,
+
+        venue_stadium,
         venue_city,
         venue_country,
+
+        md5(
+            coalesce(upper(trim(venue_stadium)), '')
+            || '|'
+            || coalesce(upper(trim(venue_city)), '')
+            || '|'
+            || coalesce(upper(trim(venue_country)), '')
+        ) as venue_key,
+
         match_winner
 
     from {{ ref('int_bowling_performance') }}
@@ -192,13 +221,21 @@ final as (
     select
         md5(
             coalesce(cast(match_id as varchar), '')
-            || '_'
-            || coalesce(player_name, '')
-            || '_'
+            || '|'
+            || coalesce(cast(team_key as varchar), '')
+            || '|'
+            || coalesce(cast(player_id as varchar), '')
+            || '|'
             || coalesce(performance_type, '')
+            || '|'
+            || coalesce(cast(innings as varchar), '')
         ) as performance_key,
 
         match_id,
+        team_key,
+        player_id,
+        venue_key,
+
         performance_type,
 
         team_name,
@@ -208,11 +245,9 @@ final as (
 
         runs_scored,
         wickets_lost,
-        --extras_received,
 
         runs_conceded,
         wickets_taken,
-        --extras_conceded,
 
         balls_faced,
         fours,
@@ -235,14 +270,13 @@ final as (
 
         hundred_flag,
         fifty_flag,
-        --duck_flag,
 
-        performance_bucket,
-        secondary_bucket,
+        
 
         match_date,
         series_id,
         series_name,
+        venue_stadium,
         venue_city,
         venue_country,
         match_winner
